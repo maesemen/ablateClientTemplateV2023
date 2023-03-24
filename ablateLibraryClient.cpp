@@ -162,7 +162,7 @@ int main(int argc, char **argv) {
 
     {
         // define some initial conditions
-        InitialConditions initialConditions{.gamma1 = 1.395, .Rgas1 = 259.84, .gamma2 = 1.43, .Rgas2 = 106.4, .Radius = 1.0, .deltaR = 0.25, .rho1 = 1.0995777621393386, .e1 = 230237.97468354428, .rho2 = 2.685284640171858, .e2 = 86604.65116279072 , .p = 100000.0, .T = 350.0, .u = 0.0};
+        InitialConditions initialConditions{.gamma1 = 1.395, .Rgas1 = 259.84, .gamma2 = 1.43, .Rgas2 = 106.4, .Radius = 2.0, .deltaR = 0.25, .rho1 = 1.0995777621393386, .e1 = 230237.97468354428, .rho2 = 2.685284640171858, .e2 = 86604.65116279072 , .p = 100000.0, .T = 350.0, .u = 0.0};
 
         // setup the run environment
         ablate::parameters::MapParameters runEnvironmentParameters(std::map<std::string, std::string>{{"title", "bubbleGasTest"}});
@@ -186,9 +186,9 @@ int main(int argc, char **argv) {
                                                       fieldDescriptors,
                                                       std::vector<std::shared_ptr<ablate::domain::modifiers::Modifier>>{std::make_shared<ablate::domain::modifiers::DistributeWithGhostCells>(),
                                                                                                                         std::make_shared<ablate::domain::modifiers::GhostBoundaryCells>()},
-                                                      std::vector<int>{40, 40},
-                                                      std::vector<double>{-5, -5},
-                                                      std::vector<double>{5, 5},
+                                                      std::vector<int>{30, 30},
+                                                      std::vector<double>{-3, -3},
+                                                      std::vector<double>{3, 3},
                                                       std::vector<std::string>{"NONE","NONE"} /*boundary*/,
                                                       false /*simplex*/,
                                                       ablate::parameters::MapParameters::Create({{"dm_refine", "0"}, {"dm_distribute", ""}}));
@@ -204,7 +204,7 @@ int main(int argc, char **argv) {
         // create a time stepper
         auto serializer = std::make_shared<ablate::io::Hdf5Serializer>(intervalIO);
         auto timeStepper = ablate::solver::TimeStepper(
-            domain, ablate::parameters::MapParameters::Create({{"ts_adapt_type", "physicsConstrained"}, {"ts_max_time","0.5"}, {"ts_dt", "0.00001"}}), {serializer}, {initialConditionAll});
+            domain, ablate::parameters::MapParameters::Create({{"ts_dt", "0.00001"}, {"ts_adapt_type", "physicsConstrained"}, {"ts_max_time","0.201"}}), {serializer}, {initialConditionAll});
 
         auto labelIds = std::vector<int>{1,2,3,4};
         auto boundaryConditions = std::vector<std::shared_ptr<ablate::finiteVolume::boundaryConditions::BoundaryCondition>>{
