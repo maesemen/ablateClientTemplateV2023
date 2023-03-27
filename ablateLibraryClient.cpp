@@ -31,8 +31,6 @@ typedef struct {
     PetscReal e1;
     PetscReal rho2;
     PetscReal e2;
-    PetscReal p;
-    PetscReal T;
     PetscReal u;
 } InitialConditions;
 
@@ -54,15 +52,15 @@ static PetscErrorCode SetInitialConditionEuler(PetscInt dim, PetscReal time, con
 
     if (((PetscSqr(x[0])+PetscSqr(x[1])) - PetscSqr(initialConditions->Radius)) < (initialConditions->deltaR * 10)) {
         PetscReal cellRho=0, cellRhoE=0, cellx[100], celly[100];
-        cellx[0] = x[0] - initialConditions->deltaR/2;
-        celly[0] = x[1] - initialConditions->deltaR/2;
+        cellx[0] = x[0] - initialConditions->deltaR/2 + initialConditions->deltaR/200;
+        celly[0] = x[1] - initialConditions->deltaR/2 + initialConditions->deltaR/200;
         for (int n = 1; n<100; ++n) {
             cellx[n] = cellx[n-1] + initialConditions->deltaR/100;
             celly[n] = celly[n-1] + initialConditions->deltaR/100;
         }
         for (int k = 0; k<100; ++k) {
             for (int l = 0; l<100; ++l) {
-                if ((PetscSqr(cellx[k])+PetscSqr(celly[l])) < PetscSqr(initialConditions->Radius) ) {
+                if ((PetscSqr(cellx[k])+PetscSqr(celly[l])) <= PetscSqr(initialConditions->Radius) ) {
                     cellRho+=initialConditions->rho2;
                     cellRhoE+=initialConditions->rho2 * initialConditions->e2;
                 } else {
@@ -90,15 +88,15 @@ static PetscErrorCode SetInitialConditionDensityVF(PetscInt dim, PetscReal time,
 
     if (((PetscSqr(x[0])+PetscSqr(x[1])) - PetscSqr(initialConditions->Radius)) < initialConditions->deltaR * 10) {
         PetscReal cell=0, cellx[100], celly[100];
-        cellx[0] = x[0] - initialConditions->deltaR/2;
-        celly[0] = x[1] - initialConditions->deltaR/2;
+        cellx[0] = x[0] - initialConditions->deltaR/2 + initialConditions->deltaR/200;
+        celly[0] = x[1] - initialConditions->deltaR/2 + initialConditions->deltaR/200;
         for (int n = 1; n<100; ++n) {
             cellx[n] = cellx[n-1] + initialConditions->deltaR/100;
             celly[n] = celly[n-1] + initialConditions->deltaR/100;
         }
         for (int k = 0; k<100; ++k) {
             for (int l = 0; l<100; ++l) {
-                if ((PetscSqr(cellx[k])+PetscSqr(celly[l])) < PetscSqr(initialConditions->Radius) ) {
+                if ((PetscSqr(cellx[k])+PetscSqr(celly[l])) <= PetscSqr(initialConditions->Radius) ) {
                     cell+=0.0;
                 } else {
                     cell+=initialConditions->rho1;
@@ -123,15 +121,15 @@ static PetscErrorCode SetInitialConditionVF(PetscInt dim, PetscReal time, const 
 
     if (((PetscSqr(x[0])+PetscSqr(x[1])) - PetscSqr(initialConditions->Radius)) < initialConditions->deltaR * 10) {
         PetscReal cell=0, cellx[100], celly[100];
-        cellx[0] = x[0] - initialConditions->deltaR/2;
-        celly[0] = x[1] - initialConditions->deltaR/2;
+        cellx[0] = x[0] - initialConditions->deltaR/2 + initialConditions->deltaR/200;
+        celly[0] = x[1] - initialConditions->deltaR/2 + initialConditions->deltaR/200;
         for (int n = 1; n<100; ++n) {
             cellx[n] = cellx[n-1] + initialConditions->deltaR/100;
             celly[n] = celly[n-1] + initialConditions->deltaR/100;
         }
         for (int k = 0; k<100; ++k) {
             for (int l = 0; l<100; ++l) {
-                if ((PetscSqr(cellx[k])+PetscSqr(celly[l])) < PetscSqr(initialConditions->Radius) ) {
+                if ((PetscSqr(cellx[k])+PetscSqr(celly[l])) <= PetscSqr(initialConditions->Radius) ) {
                     cell+=0.0;
                 } else {
                     cell+=1.0;
@@ -139,6 +137,9 @@ static PetscErrorCode SetInitialConditionVF(PetscInt dim, PetscReal time, const 
             }
         }
         u[0] = cell/100/100;
+        if ( x[0] < -1.8 && x[0] > -2.0 && x[1] < 0 && x[1] > -0.15){
+            u[0] = cell/100/100;
+        }
     }
 
     return 0;
@@ -162,14 +163,14 @@ int main(int argc, char **argv) {
 
     {
         // define some initial conditions
-        InitialConditions initialConditions{.gamma1 = 1.395, .Rgas1 = 259.84, .gamma2 = 1.43, .Rgas2 = 106.4, .Radius = 2.0, .deltaR = 0.25, .rho1 = 1.0995777621393386, .e1 = 230237.97468354428, .rho2 = 2.685284640171858, .e2 = 86604.65116279072 , .p = 100000.0, .T = 350.0, .u = 0.0};
-
-        // setup the run environment
+//        InitialConditions initialConditions{.gamma1 = 1.395, .Rgas1 = 259.84, .gamma2 = 1.43, .Rgas2 = 106.4, .Radius = 2.0, .deltaR = 0.25, .rho1 = 1.0995777621393386, .e1 = 230237.97468354428, .rho2 = 2.685284640171858, .e2 = 86604.65116279072 , .p = 100000.0, .T = 350.0, .u = 0.0};
+        InitialConditions initialConditions{.gamma1 = 1.4, .Rgas1 = 287.0, .gamma2 = 1.4, .Rgas2 = 287.0, .Radius = 0.02, .deltaR = 0.001, .rho1 = 500.0, .e1 = 500.0, .rho2 = 1000.0, .e2 = 250.00295125, .u = 0.0};
+        // setup the run environment deltaR 30 = 0.0020689655172413794
         ablate::parameters::MapParameters runEnvironmentParameters(std::map<std::string, std::string>{{"title", "bubbleGasTest"}});
         ablate::environment::RunEnvironment::Setup(runEnvironmentParameters);
 
-        auto eosOx = std::make_shared<ablate::eos::PerfectGas>(std::make_shared<ablate::parameters::MapParameters>(std::map<std::string, std::string>{{"gamma","1.395"},{"Rgas","259.84"}}));
-        auto eosBz = std::make_shared<ablate::eos::PerfectGas>(std::make_shared<ablate::parameters::MapParameters>(std::map<std::string, std::string>{{"gamma","1.43"},{"Rgas","106.4"}}));
+        auto eosOx = std::make_shared<ablate::eos::PerfectGas>(std::make_shared<ablate::parameters::MapParameters>(std::map<std::string, std::string>{{"gamma","1.4"},{"Rgas","287.0"}}));
+        auto eosBz = std::make_shared<ablate::eos::PerfectGas>(std::make_shared<ablate::parameters::MapParameters>(std::map<std::string, std::string>{{"gamma","1.4"},{"Rgas","287.0"}}));
         auto eosTwoPhase = std::make_shared<ablate::eos::TwoPhase>(eosOx,eosBz);
 
         // determine required fields for finite volume compressible flow
@@ -178,17 +179,17 @@ int main(int argc, char **argv) {
                 std::make_shared<ablate::domain::FieldDescription>(ablate::finiteVolume::processes::TwoPhaseEulerAdvection::VOLUME_FRACTION_FIELD, "", ablate::domain::FieldDescription::ONECOMPONENT, ablate::domain::FieldLocation::SOL, ablate::domain::FieldType::FVM),
                     std::make_shared<ablate::domain::FieldDescription>("pressure", "",ablate::domain::FieldDescription::ONECOMPONENT, ablate::domain::FieldLocation::AUX, ablate::domain::FieldType::FVM)};
 
-        auto interval = std::make_shared<ablate::io::interval::FixedInterval>(100);
-        auto intervalIO = std::make_shared<ablate::io::interval::SimulationTimeInterval>(0.1);
+        auto interval = std::make_shared<ablate::io::interval::FixedInterval>(0);
+        auto intervalIO = std::make_shared<ablate::io::interval::SimulationTimeInterval>(0.01);
 
         auto domain =
             std::make_shared<ablate::domain::BoxMesh>("simpleMesh",
                                                       fieldDescriptors,
                                                       std::vector<std::shared_ptr<ablate::domain::modifiers::Modifier>>{std::make_shared<ablate::domain::modifiers::DistributeWithGhostCells>(),
                                                                                                                         std::make_shared<ablate::domain::modifiers::GhostBoundaryCells>()},
-                                                      std::vector<int>{30, 30},
-                                                      std::vector<double>{-3, -3},
-                                                      std::vector<double>{3, 3},
+                                                      std::vector<int>{60, 60},
+                                                      std::vector<double>{-0.03, -0.03}, // -0.0310344827586206897
+                                                      std::vector<double>{0.03, 0.03},
                                                       std::vector<std::string>{"NONE","NONE"} /*boundary*/,
                                                       false /*simplex*/,
                                                       ablate::parameters::MapParameters::Create({{"dm_refine", "0"}, {"dm_distribute", ""}}));
@@ -204,7 +205,7 @@ int main(int argc, char **argv) {
         // create a time stepper
         auto serializer = std::make_shared<ablate::io::Hdf5Serializer>(intervalIO);
         auto timeStepper = ablate::solver::TimeStepper(
-            domain, ablate::parameters::MapParameters::Create({{"ts_dt", "0.00001"}, {"ts_adapt_type", "physicsConstrained"}, {"ts_max_time","0.201"}}), {serializer}, {initialConditionAll});
+            domain, ablate::parameters::MapParameters::Create({{"ts_type","rk"},{"ts_dt", "0.00001"}, {"ts_adapt_type", "physicsConstrained"}, {"ts_max_time","0.5001"}}), {serializer}, {initialConditionAll});
 
         auto labelIds = std::vector<int>{1,2,3,4};
         auto boundaryConditions = std::vector<std::shared_ptr<ablate::finiteVolume::boundaryConditions::BoundaryCondition>>{
@@ -216,9 +217,9 @@ int main(int argc, char **argv) {
         auto riemannFluxGL = std::make_shared<ablate::finiteVolume::fluxCalculator::RiemannStiff>(eosOx,eosBz);
         auto riemannFluxLG = std::make_shared<ablate::finiteVolume::fluxCalculator::RiemannStiff>(eosBz,eosOx);
         auto riemannFluxLL = std::make_shared<ablate::finiteVolume::fluxCalculator::RiemannStiff>(eosBz,eosBz);
-        auto processes = std::vector<std::shared_ptr<ablate::finiteVolume::processes::Process>>{std::make_shared<ablate::finiteVolume::processes::TwoPhaseEulerAdvection>(eosTwoPhase, parameters, riemannFluxGG,
-            riemannFluxGL, riemannFluxLG, riemannFluxLL),
-            std::make_shared<ablate::finiteVolume::processes::SurfaceForce>(0.01)};
+        auto processes = std::vector<std::shared_ptr<ablate::finiteVolume::processes::Process>>{
+            std::make_shared<ablate::finiteVolume::processes::SurfaceForce>(0.02361),
+            std::make_shared<ablate::finiteVolume::processes::TwoPhaseEulerAdvection>(eosTwoPhase, parameters, riemannFluxGG, riemannFluxGL, riemannFluxLG, riemannFluxLL)};
 
 
         // Create a shockTube solver
